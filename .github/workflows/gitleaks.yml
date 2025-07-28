@@ -12,9 +12,7 @@ jobs:
 
     - name: Install Gitleaks
       uses: gitleaks/gitleaks-action@v2.3.3
-      with:
-        config-path: ""  # Use default config. You can point to .gitleaks.toml if customized.
-
+      
     - name: Run Gitleaks scan
       id: gitleaks
       run: |
