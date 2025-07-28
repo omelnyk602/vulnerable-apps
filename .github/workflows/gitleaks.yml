@@ -16,9 +16,7 @@ jobs:
 
     - name: Install Gitleaks
       uses: gitleaks/gitleaks-action@v2.3.3
-      with:
-        config-path: ""  # Use default config. Customize if needed.
-
+      
     - name: Run Gitleaks scan
       id: gitleaks
       run: |
