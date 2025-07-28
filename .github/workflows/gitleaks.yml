@@ -2,62 +2,27 @@ name: Gitleaks Secret Scan - my
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-variables:
-    IMAGE_NAME: tariksk/demo-app
-    IMAGE_TAG: juice-shop-1.1
+jobs:
+  gitleaks-scan:
+    runs-on: ubuntu-latest
 
-stages:
-    - cache
-    - test
-    - build
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-create_cache:
-    stage: cache
-    image: node:18-bullseye
-    script:
-        - yarn install
-    cache: 
-        key: 
-            files:
-                - yarn.lock
-        paths:
-            - node_modules/
-            - yarn.lock
-            - .yarn
-        policy: pull-push
-        
-yarn_test:
-    image: node:18-bullseye
-    stage: test
-    script:
-        - yarn install
-        - yarn test
-    cache: 
-        key: 
-            files:
-                - yarn.lock
-        paths:
-            - node_modules/
-            - yarn.lock
-            - .yarn
-        policy: pull
+    - name: Install Gitleaks
+      uses: gitleaks/gitleaks-action@v2.3.3
+      with:
+        config-path: ""  # Use default config. You can point to .gitleaks.toml if customized.
 
-gitleaks:
-    stage: test
-    image:
-        name: zricethezav/gitleaks
-        entrypoint: [""]
-    script:
-        - gitleaks detect --verbose --source .
+    - name: Run Gitleaks scan
+      id: gitleaks
+      run: |
+        gitleaks detect --source . --verbose --report-path gitleaks-report.json
 
-
-build_image:
-    stage: build
-    image: docker:24
-    services:
-        - docker:24-dind
-    before_script:
-        - echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-    script:
-        - docker build -t $IMAGE_NAME:$IMAGE_TAG .
-        - docker push $IMAGE_NAME:$IMAGE_TAG
+    - name: Upload Report (Optional)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gitleaks-report
+        path: gitleaks-report.json
