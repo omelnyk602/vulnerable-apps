@@ -1,0 +1,32 @@
+name: Gitleaks Secret Scan
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  gitleaks-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Gitleaks
+      uses: gitleaks/gitleaks-action@v2.3.3
+      with:
+        config-path: ""  # Use default config. Customize if needed.
+
+    - name: Run Gitleaks scan
+      id: gitleaks
+      run: |
+        gitleaks detect --source . --verbose --report-path gitleaks-report.json
+
+    - name: Upload Report (Optional)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: gitleaks-report
+        path: gitleaks-report.json
