@@ -1,4 +1,4 @@
-name: Gitleaks Secret Scan
+name: Gitleaks Secret Scan - my
 on:
   workflow_dispatch:
     inputs:
