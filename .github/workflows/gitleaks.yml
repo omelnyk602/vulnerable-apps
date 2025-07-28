@@ -1,30 +1,60 @@
 name: Gitleaks Secret Scan
+variables:
+    IMAGE_NAME: tariksk/demo-app
+    IMAGE_TAG: juice-shop-1.1
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+stages:
+    - cache
+    - test
+    - build
 
-jobs:
-  gitleaks-scan:
-    runs-on: ubuntu-latest
+create_cache:
+    stage: cache
+    image: node:18-bullseye
+    script:
+        - yarn install
+    cache: 
+        key: 
+            files:
+                - yarn.lock
+        paths:
+            - node_modules/
+            - yarn.lock
+            - .yarn
+        policy: pull-push
+        
+yarn_test:
+    image: node:18-bullseye
+    stage: test
+    script:
+        - yarn install
+        - yarn test
+    cache: 
+        key: 
+            files:
+                - yarn.lock
+        paths:
+            - node_modules/
+            - yarn.lock
+            - .yarn
+        policy: pull
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+gitleaks:
+    stage: test
+    image:
+        name: zricethezav/gitleaks
+        entrypoint: [""]
+    script:
+        - gitleaks detect --verbose --source .
 
-    - name: Install Gitleaks
-      uses: gitleaks/gitleaks-action@v2.3.3
-      
-    - name: Run Gitleaks scan
-      id: gitleaks
-      run: |
-        gitleaks detect --source . --verbose --report-path gitleaks-report.json
 
-    - name: Upload Report (Optional)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: gitleaks-report
-        path: gitleaks-report.json
+build_image:
+    stage: build
+    image: docker:24
+    services:
+        - docker:24-dind
+    before_script:
+        - echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+    script:
+        - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+        - docker push $IMAGE_NAME:$IMAGE_TAG
