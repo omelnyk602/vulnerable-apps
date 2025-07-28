@@ -1,7 +1,9 @@
 name: Gitleaks Secret Scan - my
+
 on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
 jobs:
   gitleaks-scan:
     runs-on: ubuntu-latest
@@ -10,15 +12,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Gitleaks
-      uses: gitleaks/gitleaks-action@v2.3.3
-      
     - name: Run Gitleaks scan
-      id: gitleaks
-      run: |
-        gitleaks detect --source . --verbose --report-path gitleaks-report.json
+      uses: gitleaks/gitleaks-action@v2.3.3
+      with:
+        args: detect --source . --verbose --report-path gitleaks-report.json
 
-    - name: Upload Report (Optional)
+    - name: Upload Gitleaks Report (Optional)
       if: always()
       uses: actions/upload-artifact@v4
       with:
