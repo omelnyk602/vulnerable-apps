@@ -13,9 +13,11 @@ jobs:
 
     - name: Install Gitleaks
       run: |
-        curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 -o gitleaks
-        chmod +x gitleaks
-        sudo mv gitleaks /usr/local/bin/
+        curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep -Po '"tag_name": "\K.*?(?=")').tar.gz -o gitleaks.tar.gz
+        mkdir gitleaks-bin
+        tar -xzf gitleaks.tar.gz -C gitleaks-bin
+        sudo mv gitleaks-bin/gitleaks /usr/local/bin/
+        gitleaks version
 
     - name: Run Gitleaks scan
       run: |
