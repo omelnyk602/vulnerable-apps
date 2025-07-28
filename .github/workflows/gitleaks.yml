@@ -1,11 +1,9 @@
 name: Gitleaks Secret Scan - my
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Target environment'
-        required: true
-        default: 'staging'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 variables:
     IMAGE_NAME: tariksk/demo-app
     IMAGE_TAG: juice-shop-1.1
