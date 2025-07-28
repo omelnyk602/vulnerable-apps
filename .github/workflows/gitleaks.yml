@@ -1,9 +1,7 @@
 name: Gitleaks Secret Scan - my
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 variables:
     IMAGE_NAME: tariksk/demo-app
     IMAGE_TAG: juice-shop-1.1
