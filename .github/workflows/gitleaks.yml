@@ -12,15 +12,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Install Gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
         run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o gitleaks.tar.gz
+          set -euo pipefail
+
+          curl -fL \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            -o gitleaks.tar.gz
+
+          file gitleaks.tar.gz
+          tar -tzf gitleaks.tar.gz | head
+
           tar -xzf gitleaks.tar.gz
-          sudo mv gitleaks /usr/local/bin/
+          sudo mv gitleaks /usr/local/bin/gitleaks
           gitleaks version
 
       - name: Run Gitleaks scan
@@ -33,7 +43,7 @@ jobs:
 
       - name: Upload Gitleaks Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gitleaks-report
           path: gitleaks-report.json
